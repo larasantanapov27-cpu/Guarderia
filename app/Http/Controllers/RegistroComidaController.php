@@ -13,13 +13,16 @@ class RegistroComidaController extends Controller
      */
     public function index()
     {
-        $registros = DB::table('registro_comidas')
-            ->join('ninios', 'registro_comidas.id_ninio', '=', 'ninios.id_ninio')
-            ->join('personas', 'ninios.id_persona', '=', 'personas.id_persona')
-            ->join('platos', 'registro_comidas.id_plato', '=', 'platos.id_plato')
+        // Aplicamos la sintaxis de joins sin el '=' para mantener la consistencia
+        $registros = RegistroComida::join('ninios', 'registro_comidas.id_ninio', 'ninios.id_ninio')
+            ->join('personas', 'ninios.id_persona', 'personas.id_persona')
+            ->join('platos', 'registro_comidas.id_plato', 'platos.id_plato')
             ->select(
-                'registro_comidas.*', 
-                'personas.nom', 'personas.ap', 
+                'registro_comidas.id_registrocomida', 
+                'registro_comidas.fecha',
+                'registro_comidas.cantidad',
+                'personas.nom', 
+                'personas.ap', 
                 'platos.nombre as nombre_plato'
             )
             ->get();
@@ -34,7 +37,7 @@ class RegistroComidaController extends Controller
     {
         // Traemos a los niños con su nombre real (desde la tabla personas)
         $ninios = DB::table('ninios')
-            ->join('personas', 'ninios.id_persona', '=', 'personas.id_persona')
+            ->join('personas', 'ninios.id_persona', 'personas.id_persona')
             ->select('ninios.id_ninio', 'personas.nom', 'personas.ap')
             ->get();
             
@@ -49,19 +52,14 @@ class RegistroComidaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_ninio' => 'required',
-            'id_plato' => 'required',
+            'id_ninio' => 'required|exists:ninios,id_ninio',
+            'id_plato' => 'required|exists:platos,id_plato',
             'fecha'    => 'required',
             'cantidad' => 'required|integer'
         ]);
 
-        // id_registrocomida es AUTO_INCREMENT en tu SQL, no es necesario enviarlo
-        RegistroComida::create([
-            'id_ninio' => $request->id_ninio,
-            'id_plato' => $request->id_plato,
-            'fecha'    => $request->fecha,
-            'cantidad' => $request->cantidad
-        ]);
+        // id_registrocomida es la PK en tu SQL
+        RegistroComida::create($request->all());
 
         return redirect()->route('registro_comidas.index')
             ->with('success', 'Registro de comida guardado exitosamente');
@@ -72,10 +70,11 @@ class RegistroComidaController extends Controller
      */
     public function edit($id)
     {
+        // Buscamos por la PK id_registrocomida definida en el modelo
         $registro_comida = RegistroComida::findOrFail($id);
         
         $ninios = DB::table('ninios')
-            ->join('personas', 'ninios.id_persona', '=', 'personas.id_persona')
+            ->join('personas', 'ninios.id_persona', 'personas.id_persona')
             ->select('ninios.id_ninio', 'personas.nom', 'personas.ap')
             ->get();
             
@@ -90,8 +89,8 @@ class RegistroComidaController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'id_ninio' => 'required',
-            'id_plato' => 'required',
+            'id_ninio' => 'required|exists:ninios,id_ninio',
+            'id_plato' => 'required|exists:platos,id_plato',
             'fecha'    => 'required',
             'cantidad' => 'required|integer'
         ]);

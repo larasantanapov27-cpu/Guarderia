@@ -2,98 +2,114 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Familiar;
+use App\Models\RegistroComida;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class FamiliaresController extends Controller
+class RegistroComidaController extends Controller
 {
+    /**
+     * Muestra el historial de comidas.
+     */
     public function index()
     {
-        $familiares = DB::table('familiares')
-            ->join('personas as p_fam', 'familiares.id_persona', '=', 'p_fam.id_persona')
-            ->join('parentezcos', 'familiares.id_parentezco', '=', 'parentezcos.id_parentezco')
-            ->join('ninios', 'familiares.id_ninio', '=', 'ninios.id_ninio')
-            ->join('personas as p_ninio', 'ninios.id_persona', '=', 'p_ninio.id_persona')
+        // Unimos con ninios -> personas (para el nombre) y con platos
+        $registros = RegistroComida::join('ninios', 'registro_comidas.id_ninio', 'ninios.id_ninio')
+            ->join('personas', 'ninios.id_persona', 'personas.id_persona')
+            ->join('platos', 'registro_comidas.id_plato', 'platos.id_plato')
             ->select(
-                'familiares.*',
-                'p_fam.nom as nom_fam', 'p_fam.ap as ap_fam',
-                'parentezcos.nombre as parentesco',
-                'p_ninio.nom as nom_ninio', 'p_ninio.ap as ap_ninio'
+                'registro_comidas.id_regcomida',
+                'registro_comidas.fecha',
+                'registro_comidas.cantidad',
+                'ninios.matricula',
+                'personas.nom as nombre_ninio',
+                'personas.ap as apellido_ninio',
+                'platos.nombre as nombre_plato'
             )
             ->get();
 
-        return view('familiar.index', compact('familiares'));
+        return view('registro_comida.index', compact('registros'));
     }
 
+    /**
+     * Formulario de creación.
+     */
     public function create()
     {
-        $personas = DB::table('personas')->get();
-        $parentezcos = DB::table('parentezcos')->get();
-        
+        // Datos para los selects del formulario
         $ninios = DB::table('ninios')
-            ->join('personas', 'ninios.id_persona', '=', 'personas.id_persona')
-            ->select('ninios.id_ninio', 'personas.nom', 'personas.ap')
+            ->join('personas', 'ninios.id_persona', 'personas.id_persona')
+            ->select('ninios.id_ninio', 'ninios.matricula', 'personas.nom', 'personas.ap')
             ->get();
 
-        return view('familiar.create', compact('personas', 'parentezcos', 'ninios'));
+        $platos = DB::table('platos')->select('id_plato', 'nombre')->get();
+
+        return view('registro_comida.create', compact('ninios', 'platos'));
     }
 
+    /**
+     * Guarda el registro de comida.
+     */
     public function store(Request $request)
     {
         $request->validate([
-            'id_persona' => 'required',
-            'DNI' => 'required|unique:familiares,DNI',
-            'dir' => 'required|max:100',
-            'id_parentezco' => 'required',
-            'id_ninio' => 'required'
+            'id_ninio' => 'required|exists:ninios,id_ninio',
+            'id_plato' => 'required|exists:platos,id_plato',
+            'fecha'    => 'required',
+            'cantidad' => 'required|numeric'
         ]);
 
-        Familiares::create($request->all());
+        RegistroComida::create($request->all());
 
-        return redirect()->route('familiares.index')->with('success', 'Familiar registrado');
+        return redirect()->route('registro_comidas.index')
+            ->with('success', 'Registro de comida guardado correctamente');
     }
 
-    // --- MÉTODOS AÑADIDOS ---
-
+    /**
+     * Formulario de edición.
+     */
     public function edit($id)
     {
-        // Buscamos el familiar por su ID primario 'id_fam'
-        $familiar = Familiar::findOrFail($id);
-
-        $personas = DB::table('personas')->get();
-        $parentezcos = DB::table('parentezcos')->get();
+        $registro = RegistroComida::findOrFail($id);
         
         $ninios = DB::table('ninios')
-            ->join('personas', 'ninios.id_persona', '=', 'personas.id_persona')
-            ->select('ninios.id_ninio', 'personas.nom', 'personas.ap')
+            ->join('personas', 'ninios.id_persona', 'personas.id_persona')
+            ->select('ninios.id_ninio', 'ninios.matricula', 'personas.nom', 'personas.ap')
             ->get();
 
-        return view('familiar.edit', compact('familiar', 'personas', 'parentezcos', 'ninios'));
+        $platos = DB::table('platos')->select('id_plato', 'nombre')->get();
+
+        return view('registro_comida.edit', compact('registro', 'ninios', 'platos'));
     }
 
+    /**
+     * Actualiza el registro.
+     */
     public function update(Request $request, $id)
     {
         $request->validate([
-            'id_persona' => 'required',
-            // Validamos que el DNI sea único, ignorando el registro actual por su ID
-            'DNI' => 'required|unique:familiares,DNI,' . $id . ',id_fam',
-            'dir' => 'required|max:100',
-            'id_parentezco' => 'required',
-            'id_ninio' => 'required'
+            'id_ninio' => 'required|exists:ninios,id_ninio',
+            'id_plato' => 'required|exists:platos,id_plato',
+            'fecha'    => 'required',
+            'cantidad' => 'required|numeric'
         ]);
 
-        $familiar = Familiar::findOrFail($id);
-        $familiar->update($request->all());
+        $registro = RegistroComida::findOrFail($id);
+        $registro->update($request->all());
 
-        return redirect()->route('familiares.index')->with('success', 'Familiar actualizado');
+        return redirect()->route('registro_comidas.index')
+            ->with('success', 'Registro actualizado correctamente');
     }
 
+    /**
+     * Elimina el registro.
+     */
     public function destroy($id)
     {
-        $familiar = Familiar::findOrFail($id);
-        $familiar->delete();
+        $registro = RegistroComida::findOrFail($id);
+        $registro->delete();
 
-        return redirect()->route('familiares.index')->with('success', 'Familiar eliminado');
+        return redirect()->route('registro_comidas.index')
+            ->with('success', 'Registro eliminado correctamente');
     }
 }

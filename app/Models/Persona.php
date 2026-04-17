@@ -15,4 +15,9 @@ class Persona extends Model
         'ap',
         'am',
         'fecha_nac'];
+
+        public function ninio()
+    {
+        return $this->hasOne(Ninio::class, 'id_persona', 'id_persona');
+    }
 }

@@ -31,8 +31,8 @@
                     @forelse($menus as $menu)
                         <tr>
                             <td>{{ $menu->id_menu }}</td>
-                            <td><strong>{{ $menu->plato_nombre }}</strong></td>
-                            <td>{{ $menu->ingrediente_nombre }}</td>
+                            <td><strong>{{ $menu->nombre_plato }}</strong></td>
+                            <td>{{ $menu->nombre_ingrediente }}</td>
                             <td class="text-center">
                                 <div class="btn-group">
                                     <a href="{{ route('menus.edit', $menu->id_menu) }}" class="btn btn-sm btn-warning">

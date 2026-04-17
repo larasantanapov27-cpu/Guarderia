@@ -204,39 +204,39 @@
         <div class="collapse navbar-collapse" id="navbarCollapse">
           <ul class="navbar-nav me-auto mb-2 mb-md-0">
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ route('abonos.create') }}">Abonos</a></li>
+            <a class="nav-link active" aria-current="page" href="{{ route('abonos.index') }}">Abonos</a></li>
             <li class="nav-item">
              <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ route('alergias.create') }}">Alergias</a>            </li>
+            <a class="nav-link active" aria-current="page" href="{{ route('alergias.index') }}">Alergias</a>            </li>
             <li class="nav-item">
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ route('baja_ninios.create') }}">Baja Niños</a>            </li>
+            <a class="nav-link active" aria-current="page" href="{{ route('baja_ninios.index') }}">Baja Niños</a>            </li>
             <li class="nav-item">
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ route('centros.create') }}">Centros</a>            </li>
+            <a class="nav-link active" aria-current="page" href="{{ route('centros.index') }}">Centros</a>            </li>
             <li class="nav-item">
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ route('familiares.create') }}">Familiares</a>            </li>
+            <a class="nav-link active" aria-current="page" href="{{ route('familiares.index') }}">Familiares</a>            </li>
             <li class="nav-item">
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ route('ingredientes.create') }}">Ingredientes</a>            </li>
+            <a class="nav-link active" aria-current="page" href="{{ route('ingredientes.index') }}">Ingredientes</a>            </li>
             <li class="nav-item">
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ route('menus.create') }}">Menus</a>            </li>
+            <a class="nav-link active" aria-current="page" href="{{ route('menus.index') }}">Menus</a>            </li>
             <li class="nav-item">
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ route('ninios.create') }}">Niños</a>            </li>
+            <a class="nav-link active" aria-current="page" href="{{ route('ninios.index') }}">Niños</a>            </li>
             <li class="nav-item">
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ route('parentezcos.create') }}">Parentezcos</a></li>
+            <a class="nav-link active" aria-current="page" href="{{ route('parentezcos.index') }}">Parentezcos</a></li>
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ route('personas.create') }}">Personas</a></li>
+            <a class="nav-link active" aria-current="page" href="{{ route('personas.index') }}">Personas</a></li>
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ route('platos.create') }}">Platos</a></li>
+            <a class="nav-link active" aria-current="page" href="{{ route('platos.index') }}">Platos</a></li>
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ route('registro_comidas.create') }}">Registro Comidas</a></li>
+            <a class="nav-link active" aria-current="page" href="{{ route('registro_comidas.index') }}">Registro Comidas</a></li>
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ route('registro_cuentas.create') }}">Registro Cuentas</a></li>
+            <a class="nav-link active" aria-current="page" href="{{ route('registro_cuentas.index') }}">Registro Cuentas</a></li>
 
           </ul>
           <form class="d-flex" role="search">

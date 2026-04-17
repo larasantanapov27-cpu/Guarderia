@@ -13,8 +13,21 @@ class AbonoController extends Controller
      */
     public function index()
     {
-        // Traemos todos los abonos para la tabla del index
-        $abonos = Abono::all();
+        
+        /*SELECT abonos.cantidad, abonos.fecha, personas.nom AS nombre_ninio, personas_tutor.nom AS nombre_tutor, registro_cuentas.cuenta 
+        FROM abonos, registro_cuentas, familiares, ninios, personas, personas AS personas_tutor 
+        WHERE abonos.id_regcuenta = registro_cuentas.id_regcuenta 
+        AND registro_cuentas.id_fam = familiares.id_fam 
+        AND familiares.id_ninio = ninios.id_ninio 
+        AND ninios.id_persona = personas.id_persona 
+        AND familiares.id_persona = personas_tutor.id_persona;*/
+        $abonos=Abono::join('registro_cuentas', 'abonos.id_regcuenta', 'registro_cuentas.id_regcuenta')
+        ->join('familiares','registro_cuentas.id_fam','familiares.id_fam')
+        ->join('ninios','familiares.id_ninio','ninios.id_ninio')
+        ->join('personas','ninios.id_persona','personas.id_persona')
+        ->join('personas as personas_tutor','familiares.id_persona','personas_tutor.id_persona')
+        ->select('abonos.id_abono','abonos.cantidad', 'abonos.fecha', 'personas.nom AS nombre_ninio', 'personas_tutor.nom AS nombre_tutor', 'registro_cuentas.cuenta')
+        ->get();
         return view('abono.index', compact('abonos'));
     }
 

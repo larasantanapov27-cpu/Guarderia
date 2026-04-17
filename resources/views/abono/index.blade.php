@@ -20,7 +20,8 @@
                                 <th>No</th>
                                 <th>Cantidad</th>
                                 <th>Fecha</th>
-                                <th>ID Cuenta</th>
+                                <th>Nombre Nino</th>
+                                <th>Nombre Familiar</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -32,7 +33,9 @@
                                     <span class="badge bg-info text-dark">${{$abono->cantidad}}</span>
                                 </td>
                                 <td>{{$abono->fecha}}</td>
-                                <td>{{$abono->id_regcuenta}}</td>
+                                <td>{{$abono->nombre_ninio}}</td>
+                                <td>{{$abono->nombre_tutor}}</td>
+
                                 <td>
                                     <a class="btn btn-warning btn-sm px-3" href="{{route('abonos.edit', $abono->id_abono)}}">
                                         Editar

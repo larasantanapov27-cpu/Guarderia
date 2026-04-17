@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+// CLAVE: No debes poner "use App\Models\BajaNinio;" aquí adentro.
 
 class BajaNinio extends Model
 {
-    use HasFactory; // Recomendado para poder usar seeders y factories
+    use HasFactory;
 
     protected $table = 'baja_ninios';
     
@@ -15,7 +16,6 @@ class BajaNinio extends Model
     
     public $timestamps = false;
 
-    // Eliminamos 'id_baja' de aquí, ya que es autoincremental
     protected $fillable = [
         'id_ninio',
         'motivo',
@@ -24,10 +24,10 @@ class BajaNinio extends Model
 
     /**
      * Relación con el modelo Ninio
-     * Esto te permitirá hacer cosas como $baja->ninio->matricula
      */
     public function ninio()
     {
-        return $this->belongsTo(Ninio::class, 'id_ninio');
+        // Especificamos 'id_ninio' como llave foránea y local para que coincida con tu SQL
+        return $this->belongsTo(Ninio::class, 'id_ninio', 'id_ninio');
     }
 }

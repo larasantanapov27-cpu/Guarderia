@@ -13,9 +13,8 @@ class NinioController extends Controller
      */
     public function index()
     {
-        $ninios = DB::table('ninios')
-            ->join('personas', 'ninios.id_persona', '=', 'personas.id_persona')
-            ->join('centros', 'ninios.id_centro', '=', 'centros.id_centro')
+        $ninios = Ninio::join('personas', 'ninios.id_persona', 'personas.id_persona')
+            ->join('centros', 'ninios.id_centro', 'centros.id_centro')
             ->select(
                 'ninios.id_ninio', 
                 'ninios.matricula', 
@@ -23,7 +22,7 @@ class NinioController extends Controller
                 'personas.nom', 
                 'personas.ap', 
                 'personas.am',
-                'centros.nom as centro_nombre' // Alias estándar para la vista
+                'centros.nom as centro_nombre' // Cambiado de 'nombre' a 'nom'
             )
             ->get();
 
@@ -54,7 +53,6 @@ class NinioController extends Controller
 
     public function edit($id)
     {
-        // Importante: FindOrFail usa la PK id_ninio definida en el modelo
         $ninio = Ninio::findOrFail($id);
         $personas = DB::table('personas')->get();
         $centros = DB::table('centros')->get();
@@ -65,7 +63,6 @@ class NinioController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            // Corrección: Validamos unicidad de matrícula ignorando el registro actual por su PK id_ninio
             'matricula'  => "required|integer|unique:ninios,matricula,$id,id_ninio",
             'fecha'      => 'required|date',
             'id_persona' => 'required|exists:personas,id_persona',

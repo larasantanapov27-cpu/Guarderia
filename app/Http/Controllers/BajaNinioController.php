@@ -9,13 +9,13 @@ use Illuminate\Support\Facades\DB;
 class BajaNinioController extends Controller
 {
     /**
-     * Muestra el listado de bajas.
+     * Muestra la lista de bajas.
      */
     public function index()
     {
-        $bajas = DB::table('baja_ninios')
-            ->join('ninios', 'baja_ninios.id_ninio', '=', 'ninios.id_ninio')
-            ->join('personas', 'ninios.id_persona', '=', 'personas.id_persona')
+        // Usamos joins manuales para traer la matrícula y el nombre desde la tabla personas
+        $bajas = BajaNinio::join('ninios', 'baja_ninios.id_ninio', 'ninios.id_ninio')
+            ->join('personas', 'ninios.id_persona', 'personas.id_persona')
             ->select(
                 'baja_ninios.id_baja',
                 'baja_ninios.motivo',
@@ -27,26 +27,25 @@ class BajaNinioController extends Controller
             )
             ->get();
 
-        // Carpeta en singular: baja_ninio
         return view('baja_ninio.index', compact('bajas'));
     }
 
     /**
-     * Formulario para crear.
+     * Formulario de creación.
      */
     public function create()
     {
+        // Obtenemos los niños y sus nombres personales
         $ninios = DB::table('ninios')
-            ->join('personas', 'ninios.id_persona', '=', 'personas.id_persona')
+            ->join('personas', 'ninios.id_persona', 'personas.id_persona')
             ->select('ninios.id_ninio', 'ninios.matricula', 'personas.nom', 'personas.ap', 'personas.am')
             ->get();
 
-        // Carpeta en singular: baja_ninio
         return view('baja_ninio.create', compact('ninios'));
     }
 
     /**
-     * Guardar registro.
+     * Guarda la baja.
      */
     public function store(Request $request)
     {
@@ -56,11 +55,7 @@ class BajaNinioController extends Controller
             'fecha'    => 'required'
         ]);
 
-        BajaNinio::create([
-            'id_ninio' => $request->id_ninio,           
-            'motivo'   => $request->motivo,
-            'fecha'    => $request->fecha 
-        ]);
+        BajaNinio::create($request->all());
 
         return redirect()->route('baja_ninios.index')
             ->with('success', 'Baja registrada correctamente');
@@ -71,20 +66,18 @@ class BajaNinioController extends Controller
      */
     public function edit($id)
     {
-        // Busca por id_baja (definido en el modelo)
         $baja = BajaNinio::findOrFail($id);
-
+        
         $ninios = DB::table('ninios')
-            ->join('personas', 'ninios.id_persona', '=', 'personas.id_persona')
+            ->join('personas', 'ninios.id_persona', 'personas.id_persona')
             ->select('ninios.id_ninio', 'ninios.matricula', 'personas.nom', 'personas.ap', 'personas.am')
             ->get();
 
-        // Carpeta en singular: baja_ninio
         return view('baja_ninio.edit', compact('baja', 'ninios'));
     }
 
     /**
-     * Actualizar registro.
+     * Actualiza el registro.
      */
     public function update(Request $request, $id)
     {
@@ -95,19 +88,14 @@ class BajaNinioController extends Controller
         ]);
 
         $baja = BajaNinio::findOrFail($id);
-        
-        $baja->update([
-            'id_ninio' => $request->id_ninio,
-            'motivo'   => $request->motivo,
-            'fecha'    => $request->fecha,
-        ]);
+        $baja->update($request->all());
 
         return redirect()->route('baja_ninios.index')
-            ->with('success', 'Registro de baja actualizado correctamente');
+            ->with('success', 'Registro actualizado correctamente');
     }
 
     /**
-     * Eliminar registro.
+     * Elimina el registro.
      */
     public function destroy($id)
     {
@@ -115,6 +103,6 @@ class BajaNinioController extends Controller
         $baja->delete();
 
         return redirect()->route('baja_ninios.index')
-            ->with('success', 'Registro de baja eliminado');
+            ->with('success', 'Registro eliminado');
     }
 }

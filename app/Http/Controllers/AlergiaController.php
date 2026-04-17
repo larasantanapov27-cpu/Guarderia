@@ -10,16 +10,15 @@ class AlergiaController extends Controller
 {
     public function index()
     {
-        // Corregido: 'ingredientes.nombre' y alias para apellidos de personas
-        $alergias = DB::table('alergias')
-            ->join('ninios', 'alergias.id_ninio', '=', 'ninios.id_ninio')
-            ->join('personas', 'ninios.id_persona', '=', 'personas.id_persona')
-            ->join('ingredientes', 'alergias.id_ingrediente', '=', 'ingredientes.id_ingrediente')
+        $alergias = Alergia::join('ninios', 'alergias.id_ninio', 'ninios.id_ninio')
+            ->join('personas', 'ninios.id_persona',  'personas.id_persona')
+            ->join('ingredientes', 'alergias.id_ingrediente', 'ingredientes.id_ingrediente')
             ->select(
-                'alergias.*', 
+                'alergias.id_alergia', 
                 'personas.nom', 
                 'personas.ap', 
                 'personas.am', 
+                'ninios.matricula',
                 'ingredientes.nombre as nombre_ingrediente'
             )
             ->get();
@@ -29,13 +28,13 @@ class AlergiaController extends Controller
 
     public function create()
     {
-        // Corregido: Usamos 'ap' y 'am' que existen en tu tabla personas
+        // Obtenemos niños con sus nombres reales de la tabla personas
         $ninios = DB::table('ninios')
             ->join('personas', 'ninios.id_persona', '=', 'personas.id_persona')
             ->select('ninios.id_ninio', 'ninios.matricula', 'personas.nom', 'personas.ap', 'personas.am')
             ->get();
 
-        $ingredientes = DB::table('ingredientes')->get();
+        $ingredientes = DB::table('ingredientes')->orderBy('nombre', 'asc')->get();
         
         return view('alergia.create', compact('ninios', 'ingredientes'));
     }
@@ -49,20 +48,20 @@ class AlergiaController extends Controller
 
         Alergia::create($request->all());
 
-        return redirect()->route('alergias.index')->with('success', 'Alergia registrada');
+        return redirect()->route('alergias.index')->with('success', 'Alergia registrada correctamente');
     }
 
     public function edit($id)
     {
+        // Al usar protected $primaryKey = 'id_alergia' en el modelo, esto funciona bien
         $alergia = Alergia::findOrFail($id);
 
-        // Corregido: Ajuste de nombres de columnas para el select de edición
         $ninios = DB::table('ninios')
             ->join('personas', 'ninios.id_persona', '=', 'personas.id_persona')
             ->select('ninios.id_ninio', 'ninios.matricula', 'personas.nom', 'personas.ap', 'personas.am')
             ->get();
 
-        $ingredientes = DB::table('ingredientes')->get();
+        $ingredientes = DB::table('ingredientes')->orderBy('nombre', 'asc')->get();
         
         return view('alergia.edit', compact('alergia', 'ninios', 'ingredientes'));
     }
@@ -77,7 +76,7 @@ class AlergiaController extends Controller
         $alergia = Alergia::findOrFail($id);
         $alergia->update($request->all());
 
-        return redirect()->route('alergias.index')->with('success', 'Alergia actualizada');
+        return redirect()->route('alergias.index')->with('success', 'Alergia actualizada correctamente');
     }
 
     public function destroy($id)
