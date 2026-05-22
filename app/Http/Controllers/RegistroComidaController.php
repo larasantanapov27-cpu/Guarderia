@@ -12,30 +12,30 @@ class RegistroComidaController extends Controller
      * Muestra el listado de comidas con nombres de niños y platos.
      */
     public function index()
-    {
-        // Aplicamos la sintaxis de joins sin el '=' para mantener la consistencia
-        $registros = RegistroComida::join('ninios', 'registro_comidas.id_ninio', 'ninios.id_ninio')
-            ->join('personas', 'ninios.id_persona', 'personas.id_persona')
-            ->join('platos', 'registro_comidas.id_plato', 'platos.id_plato')
-            ->select(
-                'registro_comidas.id_registrocomida', 
-                'registro_comidas.fecha',
-                'registro_comidas.cantidad',
-                'personas.nom', 
-                'personas.ap', 
-                'platos.nombre as nombre_plato'
-            )
-            ->get();
+{
+    $registros = RegistroComida::join('ninios', 'registro_comidas.id_ninio', 'ninios.id_ninio')
+        ->join('personas', 'ninios.id_persona', 'personas.id_persona')
+        ->join('platos', 'registro_comidas.id_plato', 'platos.id_plato')
+        ->select(
+            // El alias 'id_regcomida' es lo que espera tu vista
+            'registro_comidas.id_registrocomida as id_regcomida', 
+            'registro_comidas.fecha',
+            'registro_comidas.cantidad',
+            'personas.nom as nombre_ninio', 
+            'personas.ap as apellido_ninio', 
+            'platos.nombre as nombre_plato'
+        )
+        ->get();
 
-        return view('registro_comida.index', compact('registros'));
-    }
+    return view('registro_comida.index', compact('registros'));
+}
 
     /**
      * Prepara el formulario de creación.
      */
     public function create()
     {
-        // Traemos a los niños con su nombre real (desde la tabla personas)
+        // Obtenemos los niños uniendo con personas para ver el nombre real
         $ninios = DB::table('ninios')
             ->join('personas', 'ninios.id_persona', 'personas.id_persona')
             ->select('ninios.id_ninio', 'personas.nom', 'personas.ap')
@@ -58,7 +58,7 @@ class RegistroComidaController extends Controller
             'cantidad' => 'required|integer'
         ]);
 
-        // id_registrocomida es la PK en tu SQL
+        // Guardamos usando la asignación masiva
         RegistroComida::create($request->all());
 
         return redirect()->route('registro_comidas.index')
@@ -70,7 +70,7 @@ class RegistroComidaController extends Controller
      */
     public function edit($id)
     {
-        // Buscamos por la PK id_registrocomida definida en el modelo
+        // Importante: Asegúrate que en tu Modelo la llave primaria sea id_registrocomida
         $registro_comida = RegistroComida::findOrFail($id);
         
         $ninios = DB::table('ninios')

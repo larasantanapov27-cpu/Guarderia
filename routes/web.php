@@ -1,10 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\VistaRapidaController;
+use App\Http\Controllers\LoginController;
 
-Route::get('/', function () {
-    return view('layouts.template');
-});
+Route::get('/', [VistaRapidaController::class, 'index'])
+    ->name('vista_rapida.index')
+    ->middleware('auth');
 
 Route::resource('abonos','App\Http\Controllers\AbonoController');
 Route::resource('alergias','App\Http\Controllers\AlergiaController');
@@ -20,9 +22,15 @@ Route::resource('ingredientes','App\Http\Controllers\IngredienteController');
 Route::resource('parentezcos','App\Http\Controllers\ParentezcoController');
 Route::resource('platos','App\Http\Controllers\PlatoController');
 Route::resource('templates','App\Http\Controllers\TemplateController');
+Route::resource('vista_rapida','App\Http\Controllers\VistaRapidaController');
+// Mostrar el formulario
+Route::get('/login', [LoginController::class, 'index'])->name('login');
 
+// Procesar el inicio de sesión
+Route::post('/login', [LoginController::class, 'login'])->name('login.store');
 
-
+// Cerrar sesión
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
 

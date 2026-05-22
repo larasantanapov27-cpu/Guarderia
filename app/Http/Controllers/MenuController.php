@@ -10,7 +10,6 @@ class MenuController extends Controller
 {
     public function index()
     {
-        // Unimos con platos e ingredientes para ver los nombres reales
         $menus = Menu::join('platos', 'menus.id_plato', 'platos.id_plato')
             ->join('ingredientes', 'menus.id_ingrediente', 'ingredientes.id_ingrediente')
             ->select(

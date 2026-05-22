@@ -19,10 +19,8 @@
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
-                            <th>Niño / Alumno</th>
-                            <th>Mes Correspondiente</th>
-                            <th>Monto Total</th>
-                            <th class="text-center">Acciones</th>
+                            <th>Familiar</th>
+                            <th>Cuenta</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -30,14 +28,12 @@
                         <tr>
                             <td class="text-muted">#{{ $cuenta->id_regcuenta }}</td>
                             <td>
-                                <strong>{{ $cuenta->nom }} {{ $cuenta->ap }} {{ $cuenta->am }}</strong>
+                                <span class="badge bg-secondary">{{ $cuenta->nombre_fam }}</span>
                             </td>
                             <td>
-                                <span class="badge bg-secondary">{{ $cuenta->mes }}</span>
+                                <span class="badge bg-secondary">{{ $cuenta->cuenta }}</span>
                             </td>
-                            <td>
-                                <span class="text-danger fw-bold">${{ number_format($cuenta->monto, 2) }}</span>
-                            </td>
+                            
                             <td class="text-center">
                                 <div class="btn-group">
                                     <a href="{{ route('registro_cuentas.edit', $cuenta->id_regcuenta) }}" 

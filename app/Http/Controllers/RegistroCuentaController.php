@@ -2,99 +2,97 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
-use App\Models\RegistroCuenta; // Asegúrate de que el nombre coincida con el modelo
+use App\Models\RegistroCuenta;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RegistroCuentaController extends Controller
 {
     /**
-     * Muestra el listado de cuentas con el nombre del niño.
+     * Muestra el listado de cuentas con el nombre del familiar responsable.
      */
     public function index()
     {
-        $cuentas = DB::table('registro_cuentas')
-            ->join('ninios', 'registro_cuentas.id_ninio', '=', 'ninios.id_ninio')
-            ->join('personas', 'ninios.id_persona', '=', 'personas.id_persona')
-            ->select('registro_cuentas.*', 'personas.nom', 'personas.ap')
+        // Usamos la sintaxis de joins sin el '=' para mantener tu estilo
+        $cuentas = RegistroCuenta::join('familiares', 'registro_cuentas.id_fam', 'familiares.id_fam')
+            ->join('personas', 'familiares.id_persona', 'personas.id_persona')
+            ->select(
+                'registro_cuentas.id_regcuenta as id_regcuenta', // Alias para tu vista
+                'registro_cuentas.cuenta',
+                'personas.nom as nombre_fam',
+                'personas.ap as apellido_fam'
+            )
             ->get();
 
         return view('registro_cuenta.index', compact('cuentas'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Prepara el formulario de creación.
      */
     public function create()
     {
-        // SEGÚN TU SQL: La relación es con NIÑOS, no familiares.
-        // Obtenemos los niños y su nombre real para el selector.
-        $ninios = DB::table('ninios')
-            ->join('personas', 'ninios.id_persona', '=', 'personas.id_persona')
-            ->select('ninios.id_ninio', 'personas.nom', 'personas.ap')
+        // Traemos a los familiares con su nombre real desde la tabla personas
+        $familiares = DB::table('familiares')
+            ->join('personas', 'familiares.id_persona', 'personas.id_persona')
+            ->select('familiares.id_fam', 'personas.nom', 'personas.ap')
             ->get();
 
-        return view('registro_cuenta.create', compact('ninios'));
+        return view('registro_cuenta.create', compact('familiares'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena el registro de la cuenta.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'id_ninio' => 'required',
-            'monto' => 'required|numeric',
-            'mes' => 'required'
+            'id_fam' => 'required|exists:familiares,id_fam',
+            'cuenta' => 'required|numeric|unique:registro_cuentas,cuenta'
         ]);
 
-        // id_regcuenta es AUTO_INCREMENT, no se envía.
-        RegistroCuenta::create([
-            'monto'    => $request->monto,
-            'mes'      => $request->mes,
-            'id_ninio' => $request->id_ninio
-        ]);
+        // id_regcuenta es la PK en tu SQL
+        RegistroCuenta::create($request->all());
 
         return redirect()->route('registro_cuentas.index')
             ->with('success', 'Cuenta registrada correctamente');
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Muestra el formulario de edición.
      */
     public function edit($id)
     {
-        // Usamos findOrFail con el ID ya que tu modelo define id_regcuenta
+        // Buscamos por la PK id_regcuenta definida en tu modelo
         $registro_cuenta = RegistroCuenta::findOrFail($id);
         
-        $ninios = DB::table('ninios')
-            ->join('personas', 'ninios.id_persona', '=', 'personas.id_persona')
-            ->select('ninios.id_ninio', 'personas.nom', 'personas.ap')
+        $familiares = DB::table('familiares')
+            ->join('personas', 'familiares.id_persona', 'personas.id_persona')
+            ->select('familiares.id_fam', 'personas.nom', 'personas.ap')
             ->get();
 
-        return view('registro_cuenta.edit', compact('registro_cuenta', 'ninios'));
+        return view('registro_cuenta.edit', compact('registro_cuenta', 'familiares'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza el registro.
      */
     public function update(Request $request, $id)
     {
         $request->validate([
-            'id_ninio' => 'required',
-            'monto' => 'required|numeric',
-            'mes' => 'required'
+            'id_fam' => 'required|exists:familiares,id_fam',
+            'cuenta' => 'required|numeric'
         ]);
 
         $registro = RegistroCuenta::findOrFail($id);
         $registro->update($request->all());
 
         return redirect()->route('registro_cuentas.index')
-            ->with('success', 'Cuenta actualizada');
+            ->with('success', 'Cuenta actualizada correctamente');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina la cuenta.
      */
     public function destroy($id)
     {
