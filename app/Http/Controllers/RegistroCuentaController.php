@@ -13,11 +13,10 @@ class RegistroCuentaController extends Controller
      */
     public function index()
     {
-        // Usamos la sintaxis de joins sin el '=' para mantener tu estilo
         $cuentas = RegistroCuenta::join('familiares', 'registro_cuentas.id_fam', 'familiares.id_fam')
             ->join('personas', 'familiares.id_persona', 'personas.id_persona')
             ->select(
-                'registro_cuentas.id_regcuenta as id_regcuenta', // Alias para tu vista
+                'registro_cuentas.id_regcuenta as id_regcuenta', 
                 'registro_cuentas.cuenta',
                 'personas.nom as nombre_fam',
                 'personas.ap as apellido_fam'
@@ -31,15 +30,16 @@ class RegistroCuentaController extends Controller
      * Prepara el formulario de creación.
      */
     public function create()
-    {
-        // Traemos a los familiares con su nombre real desde la tabla personas
-        $familiares = DB::table('familiares')
-            ->join('personas', 'familiares.id_persona', 'personas.id_persona')
-            ->select('familiares.id_fam', 'personas.nom', 'personas.ap')
-            ->get();
+{
+    // Buscamos a los familiares cruzando con niños y personas para mostrar los nombres de los alumnos
+    $ninios = DB::table('familiares')
+        ->join('ninios', 'familiares.id_ninio', 'ninios.id_ninio')
+        ->join('personas', 'ninios.id_persona', 'personas.id_persona')
+        ->select('familiares.id_fam', 'personas.nom', 'personas.ap', 'personas.am')
+        ->get();
 
-        return view('registro_cuenta.create', compact('familiares'));
-    }
+    return view('registro_cuenta.create', compact('ninios'));
+}
 
     /**
      * Almacena el registro de la cuenta.
@@ -51,7 +51,6 @@ class RegistroCuentaController extends Controller
             'cuenta' => 'required|numeric|unique:registro_cuentas,cuenta'
         ]);
 
-        // id_regcuenta es la PK en tu SQL
         RegistroCuenta::create($request->all());
 
         return redirect()->route('registro_cuentas.index')
@@ -60,18 +59,28 @@ class RegistroCuentaController extends Controller
 
     /**
      * Muestra el formulario de edición.
+     * ¡AQUÍ CORREGIMOS EL ERROR DE LA VARIABLE $ninios!
      */
     public function edit($id)
     {
-        // Buscamos por la PK id_regcuenta definida en tu modelo
+        // 1. Buscamos la cuenta que se va a editar
         $registro_cuenta = RegistroCuenta::findOrFail($id);
         
-        $familiares = DB::table('familiares')
-            ->join('personas', 'familiares.id_persona', 'personas.id_persona')
-            ->select('familiares.id_fam', 'personas.nom', 'personas.ap')
+        // 2. Traemos a los familiares vinculados con el nombre de su respectivo Niño/Alumno
+        // Cruzamos 'familiares' -> 'ninios' -> 'personas' para pintar el select de forma humana
+        $ninios = DB::table('familiares')
+            ->join('ninios', 'familiares.id_ninio', 'ninios.id_ninio')
+            ->join('personas', 'ninios.id_persona', 'personas.id_persona')
+            ->select(
+                'familiares.id_fam', // Mandamos el id_fam porque es lo que guarda tu formulario
+                'personas.nom', 
+                'personas.ap', 
+                'personas.am'
+            )
             ->get();
 
-        return view('registro_cuenta.edit', compact('registro_cuenta', 'familiares'));
+        // 3. Enviamos todas las variables requeridas (Incluyendo $ninios que causaba el error)
+        return view('registro_cuenta.edit', compact('registro_cuenta', 'ninios'));
     }
 
     /**

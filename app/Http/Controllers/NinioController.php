@@ -37,19 +37,33 @@ class NinioController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'matricula'  => 'required|integer|unique:ninios,matricula',
-            'fecha'      => 'required|date', 
-            'id_persona' => 'required|exists:personas,id_persona',
-            'id_centro'  => 'required|exists:centros,id_centro'
-        ]);
+{
+    // 1. Validación estricta de tus campos requeridos
+    $request->validate([
+        'matricula'  => 'required|numeric',
+        'fecha'      => 'required|date',
+        'id_persona' => 'required|exists:personas,id_persona',
+        'id_centro'  => 'required|exists:centros,id_centro',
+    ]);
 
-        Ninio::create($request->all());
+    // 2. OBTENER EL ID MANUAL (Solución al error 1364)
+    // Buscamos el ID más grande actual en la tabla ninios y le sumamos 1
+    $ultimoId = \DB::table('ninios')->max('id_ninio');
+    $nuevoId  = $ultimoId ? ($ultimoId + 1) : 1; // Si está vacía la tabla, empezamos en 1
 
-        return redirect()->route('ninios.index')
-            ->with('success', 'Niño registrado correctamente');
-    }
+    // 3. Insertar el registro incluyendo manualmente la Llave Primaria
+    \DB::table('ninios')->insert([
+        'id_ninio'   => $nuevoId, // ← Aquí le damos su valor manual requerido por tu esquema SQL
+        'matricula'  => $request->matricula,
+        'fecha'      => $request->fecha,
+        'id_persona' => $request->id_persona,
+        'id_centro'  => $request->id_centro,
+    ]);
+
+    // 4. Redireccionar al Index con tu alerta premium
+    return redirect()->route('ninios.index')
+        ->with('success', '¡Alumno registrado exitosamente con el ID #' . $nuevoId . '! ✨');
+}
 
     public function edit($id)
     {
